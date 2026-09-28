@@ -93,6 +93,14 @@ With real providers (all optional, one env var each): `HVAC_LLM_PROVIDER=openai`
 - **Scaling:** stateless API workers behind a load balancer; index snapshot shared read-only; Qdrant snapshot store for index sizes beyond a single file; Prometheus metrics already exposed.
 - **Latency:** per-stage timings on every answer (`trace.timings_ms`) + exact/semantic query cache — repeat questions short-circuit retrieval entirely.
 
+### Production API surface
+
+- **API-key auth** — set `HVAC_API_KEYS` (comma-separated raw keys); every `/query*` and `/ingest` route (legacy and `/v1`) then requires `X-API-Key` and returns a generic 401 otherwise. Only SHA-256 hashes of keys are stored/compared (hash-at-ingest, constant-time comparison, raw keys never logged); `/health` and `/metrics` are exempt. Unset (default) → auth is disabled with a startup warning, so existing deployments keep working.
+- **Idempotent queries** — send `Idempotency-Key` on `POST /query`: the response is cached under `sha256(key + body)` (LRU 512, TTL 1 h) and duplicate calls — including concurrent ones, which serialize per key — return the stored JSON with `X-Idempotent-Replay: true`. No header → no caching.
+- **Request limits** — question bodies over 8 KiB → `413`; `top_k` > 50 → `422`.
+- **Correlation ids** — send `X-Correlation-ID` or one is generated (uuid4); it is echoed on every response and attached to `answer.trace["correlation_id"]` for log joining across the stack.
+- **Versioning** — canonical routes live under `/v1/...` (`/v1/query`, `/v1/query/stream`, `/v1/ingest`, `/v1/health`, `/v1/metrics`). Unversioned paths remain as aliases for one release and every response on them carries `Deprecation: true` and `Sunset` headers; migrate clients to `/v1` before the sunset date.
+
 ## Honest limitations
 
 - Citation precision on the golden set measures 0.74: the composer cites the top fused chunk, and the manual's overview section occasionally outranks the expected specific section. Cross-encoder reranking (interface already in place) is the roadmap fix.
