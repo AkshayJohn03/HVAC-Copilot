@@ -76,6 +76,11 @@ class Settings(BaseSettings):
     query_cache_size: int = 256
     semantic_cache_threshold: float = 0.93
 
+    # --- Serving / auth ---
+    # Comma-separated RAW API keys (env HVAC_API_KEYS). Only SHA-256 hashes are
+    # stored at rest (serve/auth.py). Unset/empty = auth disabled with warning.
+    api_keys: str | None = None
+
     @field_validator("reranker")
     @classmethod
     def _check_reranker(cls, value: str) -> str:
