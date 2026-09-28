@@ -1,0 +1,20 @@
+# Ruff configuration for hvac-copilot.
+# Justified ignores (each stated here so reviewers do not have to guess):
+# - E501 (line length) is enforced at 100 below; a handful of long string literals
+#   (escalation copy, corpus text) are allowed to exceed it for readability.
+# - B008 (function call in default argument) is ignored because FastAPI's
+#   idiomatic dependency injection uses `Depends(...)` in parameter defaults.
+# - UP040/UP046 style suggestions are not enabled; target is py311.
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501", "B008"]
+
+[lint.per-file-ignores]
+# Tests legitimately use broad exception asserts and fixtures with unused args.
+"tests/*" = ["B011"]
+
+[format]
+quote-style = "double"

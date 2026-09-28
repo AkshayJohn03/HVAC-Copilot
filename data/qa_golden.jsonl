@@ -1,0 +1,38 @@
+{"id": "fc_x200_e04", "question": "What does fault code E04 mean on the AriaTherm X200 and what should I do?", "expected_code": "E04", "expected_section": "E04 Evaporator coil frost", "capability": "fault_code_lookup", "safety_relevant": false}
+{"id": "fc_x200_e01", "question": "The X200 heat pump shows E01 — what does that code mean?", "expected_code": "E01", "expected_section": "E01 Low suction pressure", "capability": "fault_code_lookup", "safety_relevant": false}
+{"id": "fc_x200_e09", "question": "What is error E09 on my AriaTherm X200?", "expected_code": "E09", "capability": "fault_code_lookup", "safety_relevant": false}
+{"id": "fc_x200_e10", "question": "What does E10 mean on the X200 controller?", "expected_code": "E10", "capability": "fault_code_lookup", "safety_relevant": false}
+{"id": "fc_v9_e28", "question": "VeyraCool V9 shows alarm E28 — what do I do?", "expected_code": "E28", "expected_section": "E28 High discharge temperature", "capability": "fault_code_lookup", "safety_relevant": false}
+{"id": "fc_v9_e23", "question": "What is fault E23 on the V9 chiller?", "expected_code": "E23", "capability": "fault_code_lookup", "safety_relevant": false}
+{"id": "fc_v9_e29", "question": "The V9 trips with E29, is that a phase fault?", "expected_code": "E29", "capability": "fault_code_lookup", "safety_relevant": false}
+{"id": "fc_v9_e30", "question": "What does E30 low superheat alarm mean on the VeyraCool V9?", "expected_code": "E30", "capability": "fault_code_lookup", "safety_relevant": false}
+{"id": "slang_icing_x200", "question": "My X200 heat pump keeps icing up outside", "expected_code": "E04", "expected_section": "6.2 Reduced heating capacity / icing complaints", "capability": "slang", "safety_relevant": false}
+{"id": "slang_not_cooling_v9", "question": "The VeyraCool V9 chiller is not cooling to setpoint", "expected_section": "6.1 Not cooling", "capability": "slang", "safety_relevant": false}
+{"id": "slang_tripping_x200", "question": "My X200 keeps tripping the breaker", "expected_section": "6.3 Breaker trips repeatedly", "capability": "slang", "safety_relevant": false}
+{"id": "slang_water_x200", "question": "There is water pooling under my indoor X200 unit", "expected_section": "6.4 Water around the indoor unit", "capability": "slang", "safety_relevant": false}
+{"id": "slang_no_heat_x200", "question": "My heat pump won't start and gives no heat at all", "expected_section": "6.1 No heating at all", "capability": "slang", "safety_relevant": false}
+{"id": "slang_noisy_v9", "question": "The V9 chiller is making a rattling noise from the pumps", "expected_section": "6.3 Pump cavitation noise", "capability": "slang", "safety_relevant": false}
+{"id": "proc_filter_x200", "question": "How do I check the indoor air filter on the X200?", "expected_section": "3.1 Monthly — indoor filter check", "capability": "procedure", "safety_relevant": false}
+{"id": "proc_coil_x200", "question": "What are the steps to clean the coil on the X200?", "expected_section": "3.2 Quarterly — coil cleaning", "capability": "procedure", "safety_relevant": false}
+{"id": "proc_condensate_x200", "question": "How do I flush the condensate tray on the X200?", "expected_section": "3.3 Quarterly — condensate tray flush", "capability": "procedure", "safety_relevant": false}
+{"id": "proc_annual_x200", "question": "What is included in the annual refrigerant circuit inspection on the X200?", "expected_section": "3.4 Annually — refrigerant circuit and electrical inspection", "capability": "procedure", "safety_relevant": false}
+{"id": "proc_glycol_v9", "question": "How do I check the glycol concentration on the VeyraCool V9?", "expected_section": "3.1 Monthly — glycol concentration check", "capability": "procedure", "safety_relevant": false}
+{"id": "proc_strainer_v9", "question": "What are the steps to clean the suction strainer on the V9?", "expected_section": "3.2 Quarterly — suction strainer clean", "capability": "procedure", "safety_relevant": false}
+{"id": "proc_superheat_v9", "question": "How do I verify superheat on the VeyraCool V9?", "expected_section": "3.4 Semi-annual — superheat verification", "capability": "procedure", "safety_relevant": false}
+{"id": "wire_x200_modbus", "question": "How should the Modbus bus be wired on the X200?", "expected_section": "Control wiring", "capability": "wiring", "safety_relevant": false}
+{"id": "wire_x200_ntc", "question": "What resistance should the X200 supply sensor read at 25 degrees?", "expected_section": "Sensor resistance reference", "capability": "wiring", "safety_relevant": false}
+{"id": "wire_v9_phase", "question": "What is the phase sequence requirement for the VeyraCool V9 supply?", "expected_section": "Power wiring", "capability": "wiring", "safety_relevant": false}
+{"id": "safety_braze_x200", "question": "Can I braze the suction line on the X200 while the system is still charged with R32?", "expected_section": "Brazing with nitrogen purge", "capability": "safety", "safety_relevant": true}
+{"id": "safety_recover_x200", "question": "What is the correct way to recover the R32 charge from an X200?", "expected_section": "Recovery procedure", "capability": "safety", "safety_relevant": true}
+{"id": "safety_loto_v9", "question": "How do I lock out and tag out the V9 before opening the electrical cabinet?", "expected_section": "Electrical safety and lock-out/tag-out", "capability": "safety", "safety_relevant": true}
+{"id": "safety_pressure_v9", "question": "How do I pressure test the refrigerant circuit on the V9 after a repair?", "expected_section": "Pressurised systems", "capability": "safety", "safety_relevant": true}
+{"id": "safety_topup_v9", "question": "Can I top up the R513A charge on the V9 without recovering the circuit first?", "expected_section": "Refrigerant handling (R513A, A1)", "capability": "safety", "safety_relevant": true}
+{"id": "parts_seal_v9", "question": "What is the part number for the VeyraCool V9 pump seal kit?", "expected_section": "service parts list", "capability": "parts", "safety_relevant": false}
+{"id": "parts_fan_x200", "question": "Which part number do I order for a failed X200 outdoor fan motor?", "expected_section": "service parts list", "capability": "parts", "safety_relevant": false}
+{"id": "specs_charge_x200", "question": "How much R32 charge does the AriaTherm X200 carry?", "expected_section": "Technical specifications", "capability": "specs", "safety_relevant": false}
+{"id": "specs_v9_capacity", "question": "What is the rated cooling capacity of the VeyraCool V9?", "expected_section": "Technical specifications", "capability": "specs", "safety_relevant": false}
+{"id": "typo_suply_x200", "question": "What conductor cross-section do I need for the X200 suply connection?", "expected_section": "Power wiring", "capability": "typo", "safety_relevant": false}
+{"id": "typo_comprsor_x200", "question": "X200 heat pump alarms with comprsor overcurrent — which code is that?", "expected_code": "E03", "expected_section": "E03 Compressor overcurrent", "capability": "typo", "safety_relevant": false}
+{"id": "typo_presure_v9", "question": "How do I presure test the V9 refrigerant circuit after a repair?", "expected_section": "Pressurised systems", "capability": "typo", "safety_relevant": true}
+{"id": "typo_refrigerent_x200", "question": "Where are the refrigerent safety rules for the X200?", "expected_section": "Refrigerant Handling Safety", "capability": "typo", "safety_relevant": true}
+{"id": "typo_concentraton_v9", "question": "What is the concentraton check on the V9 unit?", "expected_section": "3.1 Monthly — glycol concentration check", "capability": "typo", "safety_relevant": false}
