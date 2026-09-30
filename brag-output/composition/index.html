@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1920, height=1080" />
+<title>HVAC-Copilot — whiteboard lecture</title>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  @font-face {
+    font-family: "Ink Free";
+    src: url("assets/fonts/Inkfree.ttf") format("truetype");
+    font-weight: normal; font-style: normal;
+  }
+  :root {
+    --board: #13211d;
+    --chalk: #f2f0e9;
+    --chalk-dim: #d5d2c6;
+    --amber: #f5b942;
+    --teal: #63d3c3;
+    --blue: #9ec5e8;
+    --line: rgba(242, 240, 233, 0.25);
+  }
+  body { margin: 0; background: #0d1714; }
+  #root {
+    position: relative; width: 100%; height: 100%; overflow: hidden;
+    background:
+      radial-gradient(1400px 900px at 42% 38%, rgba(255,255,255,0.05), rgba(0,0,0,0) 62%),
+      radial-gradient(1200px 800px at 85% 90%, rgba(0,0,0,0.28), rgba(0,0,0,0) 60%),
+      var(--board);
+    color: var(--chalk);
+    font-family: system-ui, sans-serif;
+  }
+  .clip { position: absolute; inset: 0; }
+  .scene-inner { position: absolute; inset: 0; }
+  .board {
+    position: absolute; inset: 0; box-sizing: border-box;
+    display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 34px;
+    padding: 52px 60px 88px;
+  }
+  .main { position: relative; min-width: 0; }
+  .rail { position: relative; display: flex; flex-direction: column; gap: 14px; justify-content: center; min-width: 0; }
+  h1 {
+    margin: 0 0 26px 0; font-family: "Ink Free", system-ui, sans-serif;
+    font-weight: 400; font-size: 52px; line-height: 1.08; color: var(--chalk);
+  }
+  .u { display: block; width: 240px; height: 5px; margin-top: 12px; border-radius: 3px;
+       background: linear-gradient(90deg, var(--amber), rgba(245,185,66,0.15)); }
+  .u.teal { background: linear-gradient(90deg, var(--teal), rgba(99,211,195,0.15)); }
+  .scene-tag {
+    position: absolute; left: 60px; bottom: 30px;
+    font-family: "Ink Free", system-ui, sans-serif; font-size: 26px; color: var(--chalk-dim);
+  }
+  .kcard {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+    border-left: 5px solid var(--teal); border-radius: 10px; padding: 14px 18px;
+  }
+  .kcard.amber { border-left-color: var(--amber); }
+  .kcard.blue { border-left-color: var(--blue); }
+  .kcard .term { font-family: "Ink Free", system-ui, sans-serif; font-size: 28px; color: var(--chalk); display: block; }
+  .kcard .def { display: block; margin-top: 4px; font-size: 21.5px; line-height: 1.32; color: var(--chalk-dim); }
+  .panel {
+    background: rgba(255,255,255,0.045); border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 16px 20px;
+  }
+  .panel .cap { font-family: "Ink Free", system-ui, sans-serif; font-size: 25px; color: var(--chalk); display: block; margin-bottom: 8px; }
+  .mono { font-family: ui-monospace, monospace; }
+  .chip { display: inline-block; border-radius: 999px; padding: 4px 14px; font-size: 22px; font-weight: 600; }
+  .chip.amber { background: var(--amber); color: #241a06; }
+  .chip.teal { background: var(--teal); color: #0d2621; }
+  .chip.ghost { border: 1.5px solid var(--line); color: var(--chalk-dim); }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .dim { color: var(--chalk-dim); }
+  .amber { color: var(--amber); }
+  .teal { color: var(--teal); }
+  .blue { color: var(--blue); }
+  svg.stroke { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .absbox { position: absolute; box-sizing: border-box; }
+
+  /* scene 1 */
+  #s1-building { position: absolute; left: 40px; top: 170px; width: 560px; }
+  .bldg { width: 330px; height: 210px; border: 3px solid var(--blue); border-radius: 6px 6px 0 0; opacity: 0.9; }
+  .rtu { position: relative; width: 170px; height: 84px; border: 3px solid var(--blue); border-radius: 6px; margin: 0 0 -3px 90px; background: rgba(158,197,232,0.07); }
+  .fan { position: absolute; top: 14px; left: 14px; width: 52px; height: 52px; border: 2.5px solid rgba(158,197,232,0.7); border-radius: 50%; }
+  .e04chip { position: absolute; top: 16px; right: 12px; background: var(--amber); color: #241a06; font-weight: 800; font-size: 26px; border-radius: 8px; padding: 4px 12px; letter-spacing: 2px; }
+  .rtu-label { position: absolute; bottom: -34px; left: 0; font-size: 20px; color: var(--chalk-dim); }
+  #s1-van { position: absolute; left: 40px; top: 560px; width: 470px; }
+  .vanbox { border: 3px dashed var(--line); border-radius: 12px; padding: 14px 20px; }
+  .vanbox .big { font-family: "Ink Free", system-ui, sans-serif; font-size: 27px; }
+  .vanbox .sub { font-size: 20px; color: var(--chalk-dim); }
+  #s1-phone { position: absolute; right: 10px; top: 300px; width: 520px; }
+  .qcard { background: rgba(99,211,195,0.08); border: 1.5px solid var(--teal); border-radius: 16px; padding: 18px 22px; }
+  .qcard .q { font-size: 27px; line-height: 1.3; }
+  .qcard .who { display: block; margin-top: 10px; font-size: 19px; color: var(--chalk-dim); }
+  #s1-rule { position: absolute; right: 10px; top: 540px; width: 520px; font-size: 25px; color: var(--amber); border-bottom: 2px solid rgba(245,185,66,0.5); padding-bottom: 10px; }
+  #s1-title { position: absolute; left: 40px; top: 40px; }
+  #s1-title .t { font-family: "Ink Free", system-ui, sans-serif; font-size: 58px; display: block; }
+  #s1-title .s { font-size: 26px; color: var(--chalk-dim); display: block; margin-top: 4px; }
+
+  /* scene 2 */
+  #s2-book { position: absolute; left: 30px; top: 190px; width: 430px; }
+  .book { position: relative; height: 220px; }
+  .page { position: absolute; width: 200px; height: 220px; border: 3px solid var(--blue); border-radius: 8px; background: rgba(158,197,232,0.06); }
+  .page.l { left: 0; transform: perspective(600px) rotateY(18deg); }
+  .page.r { left: 200px; border-left: none; transform: perspective(600px) rotateY(-18deg); }
+  .page .ln { height: 4px; background: rgba(158,197,232,0.4); border-radius: 2px; margin: 16px 18px 0; }
+  #s2-book .lbl { display: block; margin-top: 16px; font-size: 24px; color: var(--chalk-dim); }
+  #s2-flow { position: absolute; left: 500px; top: 170px; width: 480px; }
+  .chunkpage { border: 2px solid var(--teal); color: var(--teal); border-radius: 8px; padding: 8px 12px; font-size: 21px; margin-bottom: 12px; width: 300px; background: rgba(99,211,195,0.06); }
+  #s2-desk { position: absolute; left: 830px; top: 240px; width: 300px; }
+  .llmbox { border: 3px solid var(--amber); border-radius: 14px; padding: 18px 22px; background: rgba(245,185,66,0.06); }
+  .llmbox .big { font-family: "Ink Free", system-ui, sans-serif; font-size: 34px; display: block; }
+  .llmbox .sub { font-size: 20px; color: var(--chalk-dim); display: block; margin-top: 6px; }
+  #s2-pipe { position: absolute; left: 0; right: 0; top: 560px; display: flex; gap: 14px; align-items: center; }
+  .station { border: 2px solid var(--line); border-radius: 10px; padding: 12px 0; width: 176px; text-align: center; font-family: "Ink Free", system-ui, sans-serif; font-size: 27px; color: var(--chalk); background: rgba(255,255,255,0.035); }
+  .pipe-arrow { color: var(--chalk-dim); font-size: 26px; }
+
+  /* scene 3 */
+  #s3-tree { position: absolute; left: 0; top: 170px; width: 430px; }
+  .tnode { border-left: 3px solid var(--blue); margin: 0 0 10px 0; padding: 6px 0 6px 16px; font-size: 23px; color: var(--chalk-dim); }
+  .tnode b { color: var(--chalk); font-weight: 600; }
+  #s3-page { position: absolute; left: 490px; top: 165px; width: 620px; }
+  .cutline { height: 0; border-top: 2.5px dashed rgba(245,185,66,0.65); margin: 14px 0; }
+  .chunkout { display: inline-block; border: 2px solid var(--teal); color: var(--chalk); border-radius: 8px; padding: 10px 14px; font-size: 20px; margin: 8px 10px 0 0; background: rgba(99,211,195,0.06); }
+  .chunkout .bc { display: block; color: var(--teal); font-size: 17.5px; margin-top: 4px; }
+  #s3-table { position: absolute; left: 490px; top: 470px; width: 620px; outline: 4px solid rgba(245,185,66,0); outline-offset: 8px; }
+  .ftable { width: 100%; border-collapse: collapse; font-size: 20.5px; }
+  .ftable th, .ftable td { border: 1.5px solid var(--line); padding: 7px 12px; text-align: left; }
+  .ftable th { color: var(--amber); font-weight: 700; }
+  .ring { outline: 3px solid var(--amber); outline-offset: 6px; border-radius: 4px; }
+  #s3-stamp { position: absolute; left: 40px; top: 610px; font-family: "Ink Free", system-ui, sans-serif; font-size: 34px; color: var(--amber); }
+  #s3-count { position: absolute; right: 0; top: 620px; font-size: 27px; color: var(--chalk-dim); }
+  #s3-count b { font-family: "Ink Free", system-ui, sans-serif; font-size: 40px; color: var(--teal); }
+
+  /* scene 4 */
+  .lib { width: 400px; }
+  .lib .cap { margin-bottom: 10px; }
+  .rlist { border: 2px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .rlist .r { display: block; padding: 9px 16px; font-size: 21px; border-bottom: 1.5px solid var(--line); color: var(--chalk-dim); }
+  .rlist .r:last-child { border-bottom: none; }
+  .rlist .r.top { color: var(--chalk); background: rgba(255,255,255,0.05); }
+  #s4-left { position: absolute; left: 0; top: 180px; }
+  #s4-right { position: absolute; left: 470px; top: 180px; }
+  #s4-bridge { position: absolute; left: 0; top: 520px; width: 870px; font-size: 23px; color: var(--chalk-dim); }
+  #s4-bridge b { color: var(--teal); }
+  #s4-fuse { position: absolute; left: 0; top: 590px; width: 870px; display: flex; align-items: center; gap: 16px; }
+  #s4-fuse .formula { border: 2px solid var(--teal); color: var(--teal); border-radius: 10px; padding: 10px 16px; font-size: 22px; }
+  #s4-fuse .arrow { font-size: 30px; color: var(--chalk-dim); }
+
+  /* scene 5 */
+  #s5-q { position: absolute; left: 0; top: 170px; width: 760px; }
+  #s5-q .q { font-size: 30px; line-height: 1.35; }
+  #s5-skip { position: absolute; left: 800px; top: 190px; font-family: "Ink Free", system-ui, sans-serif; font-size: 44px; color: var(--amber); border: 3px solid var(--amber); border-radius: 10px; padding: 6px 22px; }
+  #s5-row { position: absolute; left: 0; top: 330px; width: 1180px; }
+  #s5-row .rline { display: flex; gap: 14px; padding: 7px 0; border-bottom: 1.5px dashed var(--line); font-size: 24px; }
+  #s5-row .rline:last-child { border-bottom: none; }
+  #s5-row .k { min-width: 210px; color: var(--amber); font-weight: 700; }
+  #s5-row .v { color: var(--chalk); }
+  #s5-src { position: absolute; left: 0; top: 780px; font-size: 20px; color: var(--teal); }
+
+  /* scene 6 */
+  #s6-ans { position: absolute; left: 0; top: 175px; width: 860px; }
+  #s6-ans .atext { font-size: 27px; line-height: 1.55; }
+  .cmark { color: var(--teal); font-weight: 700; }
+  #s6-chips { position: absolute; left: 0; top: 480px; width: 860px; display: flex; flex-direction: column; gap: 12px; }
+  .cite { border: 1.5px solid var(--teal); border-radius: 10px; padding: 10px 16px; font-size: 22px; color: var(--chalk); background: rgba(99,211,195,0.06); }
+  .cite .path { color: var(--teal); }
+  #s6-num { position: absolute; left: 0; top: 660px; width: 860px; font-size: 22px; color: var(--chalk-dim); border-left: 4px solid var(--teal); padding-left: 16px; }
+  #s6-num b { color: var(--chalk); }
+
+  /* scene 7 */
+  #s7-grid { position: absolute; left: 0; top: 165px; width: 1200px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .q7 { border-radius: 14px; padding: 16px 20px; }
+  .q7 .qq { font-size: 26px; line-height: 1.3; }
+  .q7 .verdict { margin-top: 12px; }
+  .q7 .a7 { margin-top: 12px; font-size: 21.5px; color: var(--chalk-dim); line-height: 1.35; }
+  .q7.ok { border: 2px solid var(--teal); background: rgba(99,211,195,0.05); }
+  .q7.bad { border: 2px solid var(--amber); background: rgba(245,185,66,0.05); }
+  #s7-esc { position: absolute; left: 0; top: 560px; width: 1200px; border: 2.5px solid var(--amber); border-radius: 14px; padding: 18px 24px; background: rgba(245,185,66,0.05); }
+  #s7-esc .msg { font-size: 24px; line-height: 1.45; color: var(--chalk); }
+  #s7-esc .cite7 { margin-top: 10px; font-size: 19.5px; color: var(--teal); }
+
+  /* scene 8 */
+  #s8-grid { position: absolute; left: 0; top: 175px; width: 1200px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .stat { border: 1.5px solid var(--line); border-radius: 14px; padding: 20px 22px; background: rgba(255,255,255,0.035); }
+  .stat .n { font-family: "Ink Free", system-ui, sans-serif; font-size: 66px; color: var(--teal); line-height: 1; display: block; }
+  .stat .n.amber { color: var(--amber); }
+  .stat .t { display: block; margin-top: 8px; font-size: 22.5px; color: var(--chalk); font-weight: 600; }
+  .stat .w { display: block; margin-top: 6px; font-size: 19px; line-height: 1.3; color: var(--chalk-dim); }
+  #s8-note { position: absolute; left: 0; top: 760px; width: 1200px; font-size: 21.5px; color: var(--chalk-dim); border-left: 4px solid var(--blue); padding-left: 16px; }
+
+  /* scene 9 */
+  #s9-list { position: absolute; left: 0; top: 170px; width: 1180px; }
+  .r9 { display: flex; gap: 16px; align-items: baseline; padding: 10px 0; border-bottom: 1.5px dashed var(--line); font-size: 26px; }
+  .r9 .dot { color: var(--teal); font-weight: 800; }
+  #s9-end { position: absolute; left: 0; top: 640px; width: 1180px; }
+  #s9-end .big { font-family: "Ink Free", system-ui, sans-serif; font-size: 52px; color: var(--chalk); display: block; }
+  #s9-end .small { font-size: 27px; color: var(--amber); display: block; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="hvac-lecture" data-start="0" data-width="1920" data-height="1080" data-duration="362.06">
+
+  <!-- ============ SCENE 1 : the rooftop problem (0 – 33.801) ============ -->
+  <section id="s1" class="clip" data-start="0" data-duration="33.801">
+    <div class="scene-inner" id="s1-inner">
+      <div class="board">
+        <div class="main">
+          <div id="s1-title">
+            <span class="t">HVAC-Copilot</span>
+            <span class="s">a repair manual that answers back — a whiteboard lecture</span>
+          </div>
+          <div id="s1-building">
+            <div class="rtu">
+              <div class="fan"></div>
+              <div class="e04chip" id="e04chip">E04</div>
+              <div class="rtu-label">outdoor unit — heat pump</div>
+            </div>
+            <div class="bldg"></div>
+          </div>
+          <div id="s1-van">
+            <div class="vanbox">
+              <span class="big">the van: a 300-page PDF</span>
+              <span class="sub">and a phone full of forum guesses</span>
+            </div>
+          </div>
+          <div id="s1-phone">
+            <div class="qcard">
+              <div class="q">“What does fault code E04 mean on the X200?”</div>
+              <span class="who">typed mid-job, gloved, in a hurry</span>
+            </div>
+          </div>
+          <div id="s1-rule">No guessing on equipment that can electrocute you.</div>
+        </div>
+        <div class="rail">
+          <div class="kcard amber" id="kc-faultcode">
+            <span class="term">fault code</span>
+            <span class="def">The manufacturer’s shorthand for a failure — “E04” — printed on the unit’s display.</span>
+          </div>
+          <div class="kcard blue" id="kc-s1-promise">
+            <span class="term">the promise</span>
+            <span class="def">Type the code, get the manual’s own row back — quoted, with its section.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">01 · the rooftop</div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 2 : open-book exam (33.801 – 72.817) ============ -->
+  <section id="s2" class="clip" data-start="33.801" data-duration="39.016">
+    <div class="scene-inner" id="s2-inner">
+      <div class="board">
+        <div class="main">
+          <h1>The core idea: an open-book exam<span class="u" id="s2-u"></span></h1>
+          <div id="s2-book">
+            <div class="book">
+              <div class="page l"><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+              <div class="page r"><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+            </div>
+            <span class="lbl">the manuals, read once and indexed</span>
+          </div>
+          <div id="s2-flow">
+            <div class="chunkpage" id="s2-p1">chunk · “E04 — evaporator coil frost”</div>
+            <div class="chunkpage" id="s2-p2">chunk · coil cleaning procedure</div>
+            <div class="chunkpage" id="s2-p3">chunk · refrigerant safety notice</div>
+          </div>
+          <div id="s2-desk">
+            <div class="llmbox">
+              <span class="big">LLM</span>
+              <span class="sub">writes the wording — only from the pages on its desk</span>
+            </div>
+          </div>
+          <div id="s2-pipe">
+            <div class="station" id="st1">parse</div><div class="pipe-arrow" id="pa1">→</div>
+            <div class="station" id="st2">chunk</div><div class="pipe-arrow" id="pa2">→</div>
+            <div class="station" id="st3">index</div><div class="pipe-arrow" id="pa3">→</div>
+            <div class="station" id="st4">retrieve</div><div class="pipe-arrow" id="pa4">→</div>
+            <div class="station" id="st5">compose</div>
+          </div>
+        </div>
+        <div class="rail">
+          <div class="kcard" id="kc-llm">
+            <span class="term">LLM</span>
+            <span class="def">The text engine that writes the answer. Here it never invents facts — it only rewords what retrieval handed it.</span>
+          </div>
+          <div class="kcard" id="kc-rag">
+            <span class="term">RAG — retrieval-augmented generation</span>
+            <span class="def">First retrieve the manual’s own passages, then generate the answer from only those. An open-book exam.</span>
+          </div>
+          <div class="kcard" id="kc-corpus">
+            <span class="term">corpus</span>
+            <span class="def">The full set of documents the system can answer from — here, 15 chapters for 2 units.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">02 · the core idea</div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 3 : chunking (72.817 – 115.737) ============ -->
+  <section id="s3" class="clip" data-start="72.817" data-duration="42.920">
+    <div class="scene-inner" id="s3-inner">
+      <div class="board">
+        <div class="main">
+          <h1>Chunking: cut where an engineer would<span class="u" id="s3-u"></span></h1>
+          <div id="s3-tree">
+            <div class="tnode" id="tn1"><b>AriaTherm X200</b> (unit)</div>
+            <div class="tnode" id="tn2">└ Fault Codes (chapter)</div>
+            <div class="tnode" id="tn3">&nbsp;&nbsp;└ E04 — Evaporator coil frost (section)</div>
+            <div class="tnode" id="tn4">&nbsp;&nbsp;&nbsp;&nbsp;└ Step 1–4 (procedure steps, never split mid-step)</div>
+          </div>
+          <div id="s3-page">
+            <div class="panel">
+              <span class="cap">one manual page, cut along its headings</span>
+              <div class="cutline" id="cl1"></div>
+              <div class="cutline" id="cl2"></div>
+              <div>
+                <span class="chunkout" id="co1">section chunk<span class="bc">[X200 &gt; Fault Codes &gt; E04 …]</span></span>
+                <span class="chunkout" id="co2">step group<span class="bc">[… &gt; Step 1–4]</span></span>
+                <span class="chunkout" id="co3">whole table<span class="bc">caption + header kept together</span></span>
+              </div>
+            </div>
+          </div>
+          <div id="s3-table" class="panel">
+            <span class="cap">Table: X200 fault codes (excerpt)</span>
+            <table class="ftable" id="s3-ftable">
+              <tr><th>Code</th><th>Meaning</th><th>Severity</th></tr>
+              <tr><td>E01</td><td>Low suction pressure</td><td>Moderate</td></tr>
+              <tr><td>E04</td><td>Evaporator coil frost</td><td>Moderate</td></tr>
+            </table>
+          </div>
+          <div id="s3-stamp">tables stay WHOLE — never split</div>
+          <div id="s3-count">15 chapters → <b id="s3-num">111</b> chunks</div>
+        </div>
+        <div class="rail">
+          <div class="kcard" id="kc-chunking">
+            <span class="term">chunk / chunking</span>
+            <span class="def">One meaningful piece of the manual — small enough to retrieve precisely, big enough to make sense alone.</span>
+          </div>
+          <div class="kcard" id="kc-sahc">
+            <span class="term">section-aware hierarchical chunking</span>
+            <span class="def">Cut at the heading tree — unit, chapter, section, step — not blindly every 500 characters.</span>
+          </div>
+          <div class="kcard amber" id="kc-tablewhole">
+            <span class="term">table-as-whole-chunk</span>
+            <span class="def">A fault table row torn from its header is meaningless — so every table stays one chunk.</span>
+          </div>
+          <div class="kcard" id="kc-metadata">
+            <span class="term">metadata</span>
+            <span class="def">Attached to every chunk: which manual, which unit model, safety-tagged or not.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">03 · chunking</div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 4 : two librarians (115.737 – 166.977) ============ -->
+  <section id="s4" class="clip" data-start="115.737" data-duration="51.240">
+    <div class="scene-inner" id="s4-inner">
+      <div class="board">
+        <div class="main">
+          <h1>Two librarians, one fused list<span class="u" id="s4-u"></span></h1>
+          <div id="s4-left" class="lib panel">
+            <span class="cap">BM25 — the keyword librarian</span>
+            <div class="rlist">
+              <span class="r top" id="l1a">1 · “E04” fault-table row</span>
+              <span class="r" id="l1b">2 · coil cleaning procedure</span>
+              <span class="r" id="l1c">3 · manual overview</span>
+            </div>
+          </div>
+          <div id="s4-right" class="lib panel">
+            <span class="cap">Dense retrieval — the meaning librarian</span>
+            <div class="rlist">
+              <span class="r top" id="l2a">1 · low cooling capacity</span>
+              <span class="r" id="l2b">2 · coil frost / defrost</span>
+              <span class="r" id="l2c">3 · manual overview</span>
+            </div>
+          </div>
+          <div id="s4-bridge">field slang <b>“not cooling”</b> lands near <b>“low cooling capacity”</b> — zero shared words, same meaning</div>
+          <div id="s4-fuse">
+            <div class="formula" id="s4-formula">RRF: score = Σ 1 / (60 + rank)</div>
+            <div class="arrow" id="s4-farr">→</div>
+            <div class="rlist" style="width: 330px;" id="s4-fused">
+              <span class="r top">1 · “E04” fault-table row ✓</span>
+              <span class="r">2 · low cooling capacity</span>
+            </div>
+          </div>
+        </div>
+        <div class="rail">
+          <div class="kcard blue" id="kc-bm25">
+            <span class="term">BM25</span>
+            <span class="def">Keyword ranking: scores chunks by how often your exact words appear, weighted by how rare they are.</span>
+          </div>
+          <div class="kcard" id="kc-dense">
+            <span class="term">dense retrieval</span>
+            <span class="def">Matches meaning, not words — so typos and field slang still find the right section.</span>
+          </div>
+          <div class="kcard" id="kc-embedding">
+            <span class="term">embedding · vector</span>
+            <span class="def">Every chunk becomes a vector: a list of numbers representing what the text means.</span>
+          </div>
+          <div class="kcard" id="kc-cosine">
+            <span class="term">cosine similarity</span>
+            <span class="def">The similarity of two vectors is the angle between them — 1.0 is the same direction, 0.0 unrelated.</span>
+          </div>
+          <div class="kcard" id="kc-rrf">
+            <span class="term">RRF — reciprocal rank fusion</span>
+            <span class="def">Merge two ranked lists: a chunk scores for every list it appears in. No score calibration needed.</span>
+          </div>
+          <div class="kcard" id="kc-hybrid">
+            <span class="term">hybrid retrieval</span>
+            <span class="def">Keyword for precision, meaning for slang — fused into one list.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">04 · retrieval</div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 5 : fault-code fast path (166.977 – 193.924) ============ -->
+  <section id="s5" class="clip" data-start="166.977" data-duration="26.947">
+    <div class="scene-inner" id="s5-inner">
+      <div class="board">
+        <div class="main">
+          <h1>The fault-code fast path<span class="u" id="s5-u"></span></h1>
+          <div id="s5-q" class="qcard">
+            <div class="q">What does fault code <span id="s5-code" style="border:3px solid #f5b942; border-radius:8px; padding:0 10px;">E04</span> mean on the X200?</div>
+          </div>
+          <div id="s5-skip">SKIP SEARCH</div>
+          <div id="s5-row" class="panel">
+            <span class="cap">AriaTherm X200 — Fault Codes · the manual’s own row, verbatim</span>
+            <div class="rline" id="r5a"><span class="k">Code · Display</span><span class="v">E04 · ICE</span></div>
+            <div class="rline" id="r5b"><span class="k">Symptom</span><span class="v">Evaporator coil iced; reduced heating capacity</span></div>
+            <div class="rline" id="r5c"><span class="k">Likely cause</span><span class="v">Low airflow (dirty filter, failed indoor fan) or low refrigerant charge</span></div>
+            <div class="rline" id="r5d"><span class="k">Corrective action</span><span class="v">Restore airflow — clean filter, verify fan operation</span></div>
+            <div class="rline" id="r5e"><span class="k">Severity</span><span class="v">Moderate</span></div>
+          </div>
+          <div id="s5-src">the AI never rewords a fault table — a code hit is a lookup, not a generation</div>
+        </div>
+        <div class="rail">
+          <div class="kcard" id="kc-regex">
+            <span class="term">regex fast path</span>
+            <span class="def">Before any search, a regular expression extracts code candidates from the question.</span>
+          </div>
+          <div class="kcard amber" id="kc-directhit">
+            <span class="term">direct hit</span>
+            <span class="def">The code exists in the index — the row IS the answer. Search is skipped entirely.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">05 · the fast path</div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 6 : citations (193.924 – 220.253) ============ -->
+  <section id="s6" class="clip" data-start="193.924" data-duration="26.329">
+    <div class="scene-inner" id="s6-inner">
+      <div class="board">
+        <div class="main">
+          <h1>Answers with receipts<span class="u teal" id="s6-u"></span></h1>
+          <div id="s6-ans" class="panel">
+            <div class="atext">
+              E04 means the evaporator coil is iced — restore airflow before further testing <span class="cmark">[C1]</span>.
+              Low airflow or a low refrigerant charge is the likely cause <span class="cmark">[C1]</span>.
+              Consult the safety chapter before any refrigerant work <span class="cmark">[C2]</span>.
+            </div>
+          </div>
+          <div id="s6-chips">
+            <div class="cite" id="s6-c1">C1 · <span class="path">AriaTherm X200 — Fault Codes &gt; E04 Evaporator coil frost</span></div>
+            <div class="cite" id="s6-c2">C2 · <span class="path">AriaTherm X200 — Refrigerant Handling Safety</span></div>
+          </div>
+          <div id="s6-num">groundedness check: every word — and every <b>number</b> — in the answer must exist in the retrieved pages. If they don’t, the system says what’s missing instead of guessing.</div>
+        </div>
+        <div class="rail">
+          <div class="kcard" id="kc-citation">
+            <span class="term">citation</span>
+            <span class="def">The answer names the document, chapter and section it used — derived from what it actually used.</span>
+          </div>
+          <div class="kcard" id="kc-grounded">
+            <span class="term">groundedness</span>
+            <span class="def">How much of the answer is backed by retrieved context — measured, deterministically, no judge model.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">06 · citations</div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 7 : the safety refusal (220.253 – 284.095) ============ -->
+  <section id="s7" class="clip" data-start="220.253" data-duration="63.842">
+    <div class="scene-inner" id="s7-inner">
+      <div class="board">
+        <div class="main">
+          <h1>The safety refusal<span class="u" id="s7-u"></span></h1>
+          <div id="s7-grid">
+            <div class="q7 ok" id="q7a">
+              <div class="qq">“How much refrigerant does the unit carry?”</div>
+              <div class="verdict"><span class="chip teal">SPEC LOOKUP — EXEMPT</span></div>
+              <div class="a7">Naming a factory charge weight synthesizes nothing → answered from the spec table: “factory charge 1.35 kg”.</div>
+            </div>
+            <div class="q7 bad" id="q7b">
+              <div class="qq">“Recover the refrigerant.”</div>
+              <div class="verdict"><span class="chip amber">WORK VERB → SAFETY-CRITICAL</span></div>
+              <div class="a7">Same noun, now a work verb — hazardous work on pressurized circuits.</div>
+            </div>
+          </div>
+          <div id="s7-esc">
+            <div class="msg">“I can’t give procedural guidance for this. The question involves refrigerant for the X200, which is safety-critical, and no section tagged as safety documentation supports an answer here. Stop and contact a certified HVAC technician; a supervisor has been flagged to review this request.”</div>
+            <div class="cite7">cites the nearest safety section: “3.4 Annually — refrigerant circuit and electrical inspection”</div>
+          </div>
+        </div>
+        <div class="rail">
+          <div class="kcard amber" id="kc-safetytopic">
+            <span class="term">safety-critical topic</span>
+            <span class="def">Refrigerant handling, pressurized systems, live electrical work — where wrong guidance can hurt someone.</span>
+          </div>
+          <div class="kcard" id="kc-twotier">
+            <span class="term">two-tier detection</span>
+            <span class="def">A designation counts only with a work verb: “R32” alone is fine — “recover the R32” is not.</span>
+          </div>
+          <div class="kcard amber" id="kc-refusal">
+            <span class="term">retrieval-grounded refusal</span>
+            <span class="def">Computed from the index — no safety-tagged source, no guidance. Deterministic, testable, auditable.</span>
+          </div>
+          <div class="kcard" id="kc-alarm">
+            <span class="term">alarm fatigue</span>
+            <span class="def">A guardrail that fires on harmless questions trains users to ignore it — hence the exemption.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">07 · the guardrail</div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 8 : the numbers (284.095 – 326.247) ============ -->
+  <section id="s8" class="clip" data-start="284.095" data-duration="42.152">
+    <div class="scene-inner" id="s8-inner">
+      <div class="board">
+        <div class="main">
+          <h1>Measured, not claimed<span class="u teal" id="s8-u"></span></h1>
+          <div id="s8-grid">
+            <div class="stat" id="st-a"><span class="n" id="n-a">0</span><span class="t">recall@5</span><span class="w">the right section in the top 5 — every time</span></div>
+            <div class="stat" id="st-b"><span class="n" id="n-b">0</span><span class="t">safety violations</span><span class="w">the refusal is not an accident</span></div>
+            <div class="stat" id="st-c"><span class="n" id="n-c">0</span><span class="t">golden questions</span><span class="w">a fixed exam, written in advance</span></div>
+            <div class="stat" id="st-d"><span class="n amber" id="n-d">0</span><span class="t">citation precision</span><span class="w">the honest weak spot — rerank is the fix</span></div>
+            <div class="stat" id="st-e"><span class="n" id="n-e">0</span><span class="t">groundedness</span><span class="w">words and numbers anchored to the manual</span></div>
+            <div class="stat" id="st-f"><span class="n" id="n-f">0</span><span class="t">re-embeds, unchanged corpus</span><span class="w">content hash: pay only for what changed</span></div>
+          </div>
+          <div id="s8-note">honest note: on this keyword-heavy corpus, hybrid ties BM25-only at 1.0 — measured in CI, not claimed. Fusion earns its keep on paraphrases.</div>
+        </div>
+        <div class="rail">
+          <div class="kcard" id="kc-golden">
+            <span class="term">golden set</span>
+            <span class="def">38 questions with their expected source sections — a regression exam the code must pass.</span>
+          </div>
+          <div class="kcard" id="kc-hash">
+            <span class="term">content hash</span>
+            <span class="def">A SHA-256 fingerprint per chunk — unchanged text reuses its old vector, for free.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">08 · the numbers</div>
+    </div>
+  </section>
+
+  <!-- ============ SCENE 9 : recap (326.247 – 362.060) ============ -->
+  <section id="s9" class="clip" data-start="326.247" data-duration="35.813">
+    <div class="scene-inner" id="s9-inner">
+      <div class="board">
+        <div class="main">
+          <h1>The 30-second recap<span class="u teal" id="s9-u"></span></h1>
+          <div id="s9-list">
+            <div class="r9" id="r9a"><span class="dot">1</span><span>Manuals become meaningful chunks — tables kept whole.</span></div>
+            <div class="r9" id="r9b"><span class="dot">2</span><span>Questions are understood: slang translated, fault codes extracted.</span></div>
+            <div class="r9" id="r9c"><span class="dot">3</span><span>Search runs two ways — keyword and meaning — fused into one list.</span></div>
+            <div class="r9" id="r9d"><span class="dot">4</span><span>A fault code never reaches the AI — it’s an exact lookup.</span></div>
+            <div class="r9" id="r9e"><span class="dot">5</span><span>Answers cite their sections, with numbers anchored to the manual.</span></div>
+            <div class="r9" id="r9f"><span class="dot">6</span><span>No safety source → refusal, citation of the nearest safety section, human escalation.</span></div>
+          </div>
+          <div id="s9-end">
+            <span class="big">HVAC-Copilot — a repair manual that answers back.</span>
+            <span class="small">And knows when not to.</span>
+          </div>
+        </div>
+        <div class="rail">
+          <div class="kcard" id="kc-learn">
+            <span class="term">now explain it to someone else</span>
+            <span class="def">That was the success metric. GLOSSARY.md in the repo root has all 80 terms.</span>
+          </div>
+        </div>
+      </div>
+      <div class="scene-tag">09 · recap</div>
+    </div>
+  </section>
+
+  <!-- ================= AUDIO ================= -->
+  <!-- music bed: steady & clean, looped back-to-back, quiet under narration -->
+  <audio id="music-1" data-start="0" data-duration="117.384" data-track-index="10" data-volume="0.13" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+  <audio id="music-2" data-start="117.384" data-duration="117.384" data-track-index="10" data-volume="0.13" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+  <audio id="music-3" data-start="234.768" data-duration="117.384" data-track-index="10" data-volume="0.13" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+  <audio id="music-4" data-start="352.152" data-duration="9.908" data-track-index="10" data-volume="0.13" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+
+  <!-- narration: one WAV per scene, scene lengths derived from these -->
+  <audio id="vo-1" data-start="1.200" data-duration="32.101" data-track-index="3" data-volume="1" src="assets/voiceover/voice_01.wav"></audio>
+  <audio id="vo-2" data-start="34.151" data-duration="38.266" data-track-index="4" data-volume="1" src="assets/voiceover/voice_02.wav"></audio>
+  <audio id="vo-3" data-start="73.167" data-duration="42.170" data-track-index="5" data-volume="1" src="assets/voiceover/voice_03.wav"></audio>
+  <audio id="vo-4" data-start="116.087" data-duration="50.490" data-track-index="6" data-volume="1" src="assets/voiceover/voice_04.wav"></audio>
+  <audio id="vo-5" data-start="167.327" data-duration="26.198" data-track-index="7" data-volume="1" src="assets/voiceover/voice_05.wav"></audio>
+  <audio id="vo-6" data-start="194.274" data-duration="25.579" data-track-index="8" data-volume="1" src="assets/voiceover/voice_06.wav"></audio>
+  <audio id="vo-7" data-start="220.603" data-duration="63.092" data-track-index="9" data-volume="1" src="assets/voiceover/voice_07.wav"></audio>
+  <audio id="vo-8" data-start="284.445" data-duration="41.402" data-track-index="11" data-volume="1" src="assets/voiceover/voice_08.wav"></audio>
+  <audio id="vo-9" data-start="326.597" data-duration="32.464" data-track-index="12" data-volume="1" src="assets/voiceover/voice_09.wav"></audio>
+
+  <!-- sparse SFX -->
+  <audio id="sfx-1" data-start="1.600" data-duration="1" data-track-index="13" data-volume="0.5" src="assets/sfx/interface/drop_001.ogg"></audio>
+  <audio id="sfx-2" data-start="174.000" data-duration="1" data-track-index="14" data-volume="0.55" src="assets/sfx/impact/impactSoft_medium_000.ogg"></audio>
+  <audio id="sfx-3" data-start="294.200" data-duration="1" data-track-index="15" data-volume="0.55" src="assets/sfx/impact/impactSoft_medium_002.ogg"></audio>
+  <audio id="sfx-4" data-start="352.300" data-duration="1" data-track-index="16" data-volume="0.4" src="assets/sfx/interface/drop_001.ogg"></audio>
+</div>
+
+<script>
+  // Scene timing constants (derived from measured voiceover WAV durations)
+  const S1 = 0, S2 = 33.801, S3 = 72.817, S4 = 115.737, S5 = 166.977,
+        S6 = 193.924, S7 = 220.253, S8 = 284.095, S9 = 326.247;
+  const END = 362.06;
+
+  const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
+
+  // helpers (all on inner wrappers — never on .clip elements)
+  const IN = (sel, at, dy = 18, dur = 0.55) =>
+    tl.fromTo(sel, { opacity: 0, y: dy }, { opacity: 1, y: 0, duration: dur }, at);
+  const SC = (sel, at, dur = 0.6) =>
+    tl.fromTo(sel, { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: dur }, at);
+  const OUT = (sel, at) => tl.to(sel, { opacity: 0, duration: 0.45, ease: "power1.in" }, at);
+
+  // ---- Scene 1 (0 – 33.801) --------------------------------------------
+  IN("#s1-title", 0.15, 24, 0.7);
+  IN("#s1-building", 2.2);
+  tl.fromTo("#e04chip", { opacity: 1 }, { opacity: 0.3, duration: 0.45, repeat: 7, yoyo: true, ease: "steps(1)" }, 3.0);
+  IN("#kc-faultcode", 4.8);
+  IN("#s1-van", 11.5);
+  IN("#kc-s1-promise", 14.5);
+  IN("#s1-phone", 20.0);
+  IN("#s1-rule", 26.0);
+  OUT("#s1-inner", S2 - 0.55);
+
+  // ---- Scene 2 (33.801 – 72.817) ----------------------------------------
+  IN("#s2-inner > .board > .main > h1", S2 + 0.15, 22, 0.6);
+  SC("#s2-u", S2 + 0.6);
+  IN("#s2-book", S2 + 3.2);
+  IN("#kc-llm", S2 + 7.0);
+  IN("#s2-p1", S2 + 11.0, -26);
+  IN("#s2-p2", S2 + 12.0, -26);
+  IN("#s2-p3", S2 + 13.0, -26);
+  IN("#s2-desk", S2 + 14.2);
+  IN("#kc-rag", S2 + 16.0);
+  IN("#kc-corpus", S2 + 20.5);
+  ["#st1", "#pa1", "#st2", "#pa2", "#st3", "#pa3", "#st4", "#pa4", "#st5"].forEach((sel, i) =>
+    IN(sel, S2 + 24.0 + i * 0.55, 14, 0.4)
+  );
+  OUT("#s2-inner", S3 - 0.55);
+
+  // ---- Scene 3 (72.817 – 115.737) ----------------------------------------
+  IN("#s3-inner > .board > .main > h1", S3 + 0.15, 22, 0.6);
+  SC("#s3-u", S3 + 0.6);
+  ["#tn1", "#tn2", "#tn3", "#tn4"].forEach((sel, i) => IN(sel, S3 + 2.8 + i * 0.8, -14, 0.45));
+  IN("#kc-chunking", S3 + 8.0);
+  IN("#s3-page", S3 + 12.0);
+  SC("#cl1", S3 + 13.2, 0.5);
+  SC("#cl2", S3 + 13.9, 0.5);
+  IN("#co1", S3 + 14.6, 16, 0.4);
+  IN("#co2", S3 + 15.3, 16, 0.4);
+  IN("#co3", S3 + 16.0, 16, 0.4);
+  IN("#kc-sahc", S3 + 17.5);
+  IN("#s3-table", S3 + 21.0);
+  tl.to("#s3-table", { outlineColor: "rgba(245,185,66,0.9)", duration: 0.35 }, S3 + 22.2);
+  tl.fromTo("#s3-stamp", { opacity: 0, y: 10, rotation: -3 }, { opacity: 1, y: 0, rotation: -3, duration: 0.4 }, S3 + 23.2);
+  IN("#kc-tablewhole", S3 + 24.6);
+  IN("#kc-metadata", S3 + 30.0);
+  const cnt3 = { v: 0 };
+  tl.fromTo(cnt3, { v: 0 }, { v: 111, duration: 1.8, ease: "power1.out", onUpdate: () => {
+      document.getElementById("s3-num").textContent = Math.round(cnt3.v);
+    } }, S3 + 34.5);
+  IN("#s3-count", S3 + 34.2, 12, 0.4);
+  OUT("#s3-inner", S4 - 0.55);
+
+  // ---- Scene 4 (115.737 – 166.977) ----------------------------------------
+  IN("#s4-inner > .board > .main > h1", S4 + 0.15, 22, 0.6);
+  SC("#s4-u", S4 + 0.6);
+  IN("#s4-left", S4 + 2.8);
+  IN("#l1a", S4 + 4.2, 10, 0.35); IN("#l1b", S4 + 4.8, 10, 0.35); IN("#l1c", S4 + 5.4, 10, 0.35);
+  IN("#kc-bm25", S4 + 6.6);
+  IN("#s4-right", S4 + 10.5);
+  IN("#l2a", S4 + 11.9, 10, 0.35); IN("#l2b", S4 + 12.5, 10, 0.35); IN("#l2c", S4 + 13.1, 10, 0.35);
+  IN("#kc-dense", S4 + 14.6);
+  IN("#kc-embedding", S4 + 19.5);
+  IN("#kc-cosine", S4 + 25.0);
+  IN("#s4-bridge", S4 + 30.5);
+  IN("#s4-fuse", S4 + 36.0);
+  IN("#kc-rrf", S4 + 40.0);
+  IN("#kc-hybrid", S4 + 45.0);
+  OUT("#s4-inner", S5 - 0.55);
+
+  // ---- Scene 5 (166.977 – 193.924) ----------------------------------------
+  IN("#s5-inner > .board > .main > h1", S5 + 0.15, 22, 0.6);
+  SC("#s5-u", S5 + 0.6);
+  IN("#s5-q", S5 + 2.0);
+  tl.fromTo("#s5-code", { borderColor: "rgba(245,185,66,0)", scale: 1 }, { borderColor: "rgba(245,185,66,1)", duration: 0.45 }, S5 + 5.3);
+  IN("#kc-regex", S5 + 6.6);
+  tl.fromTo("#s5-skip", { opacity: 0, y: 12, rotation: -4 }, { opacity: 1, y: 0, rotation: -4, duration: 0.45 }, S5 + 11.3);
+  IN("#s5-row", S5 + 13.8);
+  ["#r5a", "#r5b", "#r5c", "#r5d", "#r5e"].forEach((sel, i) => IN(sel, S5 + 14.5 + i * 0.7, 8, 0.35));
+  IN("#s5-src", S5 + 18.6, 10, 0.4);
+  IN("#kc-directhit", S5 + 20.0);
+  OUT("#s5-inner", S6 - 0.55);
+
+  // ---- Scene 6 (193.924 – 220.253) ----------------------------------------
+  IN("#s6-inner > .board > .main > h1", S6 + 0.15, 22, 0.6);
+  SC("#s6-u", S6 + 0.6);
+  IN("#s6-ans", S6 + 2.2);
+  IN("#s6-c1", S6 + 8.0, 14, 0.45);
+  IN("#s6-c2", S6 + 9.0, 14, 0.45);
+  IN("#kc-citation", S6 + 11.5);
+  IN("#s6-num", S6 + 15.5);
+  IN("#kc-grounded", S6 + 17.0);
+  OUT("#s6-inner", S7 - 0.55);
+
+  // ---- Scene 7 (220.253 – 284.095) ----------------------------------------
+  IN("#s7-inner > .board > .main > h1", S7 + 0.15, 22, 0.6);
+  SC("#s7-u", S7 + 0.6);
+  IN("#q7a", S7 + 3.0);
+  IN("#kc-safetytopic", S7 + 6.0);
+  IN("#q7b", S7 + 11.5);
+  IN("#kc-twotier", S7 + 15.0);
+  IN("#s7-esc", S7 + 20.5);
+  IN("#kc-refusal", S7 + 29.0);
+  IN("#kc-alarm", S7 + 35.5);
+  OUT("#s7-inner", S8 - 0.55);
+
+  // ---- Scene 8 (284.095 – 326.247) ----------------------------------------
+  IN("#s8-inner > .board > .main > h1", S8 + 0.15, 22, 0.6);
+  SC("#s8-u", S8 + 0.6);
+  const stats = [
+    ["#st-a", "#n-a", 1.0, 1, "0.0"],
+    ["#st-b", "#n-b", 0, 1, "0"],
+    ["#st-c", "#n-c", 38, 1, "0"],
+    ["#st-d", "#n-d", 0.74, 1, "0.00"],
+    ["#st-e", "#n-e", 0.81, 1, "0.00"],
+    ["#st-f", "#n-f", 0, 1, "0"]
+  ];
+  stats.forEach(([tile, num, val, _, fmt], i) => {
+    const at = S8 + 2.5 + i * 1.1;
+    IN(tile, at, 14, 0.4);
+    const obj = { v: 0 };
+    tl.fromTo(obj, { v: 0 }, {
+      v: val, duration: 1.2, ease: "power1.out",
+      onUpdate: () => { document.querySelector(num).textContent = obj.v.toFixed(fmt === "0.0" ? 1 : (fmt === "0.00" ? 2 : 0)); }
+    }, at + 0.2);
+  });
+  IN("#kc-golden", S8 + 11.0);
+  IN("#s8-note", S8 + 17.0, 12, 0.45);
+  IN("#kc-hash", S8 + 21.0);
+  OUT("#s8-inner", S9 - 0.55);
+
+  // ---- Scene 9 (326.247 – end) --------------------------------------------
+  IN("#s9-inner > .board > .main > h1", S9 + 0.15, 22, 0.6);
+  SC("#s9-u", S9 + 0.6);
+  ["#r9a", "#r9b", "#r9c", "#r9d", "#r9e", "#r9f"].forEach((sel, i) => IN(sel, S9 + 2.0 + i * 1.7, 12, 0.45));
+  IN("#s9-end", S9 + 25.5, 16, 0.8);
+  IN("#kc-learn", S9 + 28.0);
+
+  window.__timelines["hvac-lecture"] = tl;
+</script>
+</body>
+</html>
