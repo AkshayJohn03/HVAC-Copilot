@@ -1,0 +1,6 @@
+I recorded a whiteboard lecture of my own repo: HVAC-Copilot, a repair manual
+that answers back — BM25 + dense retrieval fused with RRF, fault-code lookups
+that skip the AI entirely, citations with receipts, and a safety refusal
+grounded in the index rather than a model's opinion. Six minutes, every
+keyword defined on screen. recall@5 = 1.0, zero safety violations on 38 golden
+questions.
