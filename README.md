@@ -1,5 +1,8 @@
 # HVAC-Copilot
 
+[![▶ whiteboard explainer video · 6m02s](https://img.shields.io/badge/%E2%96%B6_whiteboard_explainer-6m02s-E8B44A?style=flat-square&logo=googleplay&logoColor=white)](brag-output/brag.mp4)
+
+
 **Multimodal document processor → grounded RAG assistant for HVAC field technicians.**
 
 ---
