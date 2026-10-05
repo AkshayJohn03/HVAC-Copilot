@@ -22,6 +22,20 @@
 
 ---
 
+## Positioning — why not a Siemens/Honeywell clone
+
+The incumbents (Siemens Industrial Copilot, Schneider Electric, Honeywell Forge) ship
+vertical assistants bound to their own equipment ecosystems. The industry gap this repo
+targets: **real HVAC knowledge lives in unstructured schematics, P&ID diagrams, and
+non-standard OEM manuals** — exactly where generic RAG fails.
+
+The playbook here is not "a chatbot for HVAC" but a **multimodal diagnostic engine**:
+a technician photographs a fault code or error LED → the copilot cross-references the
+wiring diagrams and OEM manual → returns physical, safety-gated troubleshooting steps
+with citations. And because it is hardened by the same portfolio that attacks it
+(RedForge runs indirect-injection campaigns against the manual ingestion path) and
+gated by VerdictAI evals, "enterprise reliability" is a tested claim, not a slide.
+
 ## Architecture
 
 ```mermaid
